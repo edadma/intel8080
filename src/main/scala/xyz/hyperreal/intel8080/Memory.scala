@@ -64,7 +64,7 @@ class RAM(val name: String, val start: Int, end: Int) extends Addressable {
   require(start >= 0)
   require(end >= start)
 
-  val size = (end - start + 1)
+  val size = end - start + 1
 
   protected val mem = new Array[Byte](size)
 
@@ -72,9 +72,9 @@ class RAM(val name: String, val start: Int, end: Int) extends Addressable {
     for (i <- 0 until size)
       mem(i) = 0
 
-  def readByte(addr: Int) = mem((addr - start))
+  def readByte(addr: Int) = mem(addr - start) & 0xFF
 
-  def writeByte(addr: Int, value: Int) = mem((addr - start)) = value.asInstanceOf[Byte]
+  def writeByte(addr: Int, value: Int) = mem(addr - start) = value.asInstanceOf[Byte]
 
   override def toString = s"$name RAM: ${hexAddress(start.toInt)}-${hexAddress(end.toInt)}"
 }
@@ -84,17 +84,17 @@ class ROM(val name: String, val start: Int, end: Int) extends Addressable {
   require(start >= 0)
   require(end >= start)
 
-  val size = (end - start + 1)
+  val size = end - start + 1
 
   protected val mem = new Array[Byte](size)
 
-  def readByte(addr: Int) = mem((addr - start))
+  def readByte(addr: Int) = mem(addr - start) & 0xFF
 
   def writeByte(addr: Int, value: Int) =
     sys.error(
       "read only memory: " + (addr & 0xffff).toHexString + " (tried to write " + (value & 0xff).toHexString + ")")
 
-  override def programByte(addr: Int, value: Int) = mem((addr - start)) = value.asInstanceOf[Byte]
+  override def programByte(addr: Int, value: Int) = mem(addr - start) = value.asInstanceOf[Byte]
 
   override def toString = s"$name ROM: ${hexAddress(start.toInt)}-${hexAddress(start.toInt + size - 1)}"
 

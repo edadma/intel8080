@@ -10,7 +10,7 @@ case class Interrupt(level: Int, vector: Option[Int]) extends Ordered[Interrupt]
   def compare(that: Interrupt): Int = level - that.level
 }
 
-class CPU {
+class CPU extends Regs {
 
 //  val UNDERLINED_OFF = "\u001B[24m"
 //  val LABEL_BG = "\u001B[48;5;238m"
@@ -51,6 +51,20 @@ class CPU {
   var running = false
   var stopped = false
 
+  def readReg(r: Int): Int =
+    r match {
+      case M => memory.readByte(readPair(HL))
+      case _ => R(r)
+    }
+
+  def readPair(p: Int): Int = (R(p) << 8 | R(p + 1)) & 0xFFFF
+
+  def writeReg(r: Int, v: Int): Unit =
+    r match {
+      case M => memory.writeByte(readPair(HL), v)
+      case _ => R(r) = v
+    }
+
   def resettable(dev: Device): Unit = {
     devices += dev
   }
@@ -73,7 +87,7 @@ class CPU {
 //      interruptsAvailable = false
   }
 
-  def trap(vector: Int) = false
+  def trap(n: Int) = false
 
   def jump(address: Int): Unit = {
     prog = memory.find(address)

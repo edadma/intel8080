@@ -1,11 +1,8 @@
 package xyz.hyperreal.intel8080
 
-import java.time.LocalTime
-import java.time.temporal.ChronoField
-
 class CPUWithServices extends CPU {
 
-//  override def trap(vector: Int) = {
+  override def trap(n: Int): Boolean = {
 //    def prt =
 //      for (c <- A(1) to A(1) + D(1) & 0xFFFF)
 //        print(memoryRead(c, ByteSize, false).toChar)
@@ -22,8 +19,11 @@ class CPUWithServices extends CPU {
 //      prtz(A(1))
 //    }
 //
-//    vector match {
-//      case 15 =>
+    n match {
+      case 7 =>
+        R(RA) match {
+          case 0 => println(hexByte(R(RB)))
+        }
 //        R(0).toShort match {
 //          case 0 =>
 //            prt
@@ -60,9 +60,9 @@ class CPUWithServices extends CPU {
 //          case _  => sys.error(s"unknown task number: ${R(0)}")
 //        }
 //
-//        true
-//      case _ => false
-//    }
-//  }
+        true
+      case _ => false
+    }
+  }
 
 }

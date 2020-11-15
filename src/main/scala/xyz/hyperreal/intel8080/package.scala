@@ -15,7 +15,7 @@ package object intel8080 {
 
   def ltod(l: Long) = java.lang.Double.longBitsToDouble(l)
 
-  def hexByte(a: Int) = "%02x".format(a & 0xFF).toUpperCase
+  def hexByte(a: Int): String = "%02x".format(a & 0xFF).toUpperCase
 
   def hexShort(a: Int) = hexByte(a >> 8) + hexByte(a)
 
