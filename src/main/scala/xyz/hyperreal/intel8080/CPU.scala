@@ -59,12 +59,24 @@ class CPU extends Regs {
       case _ => R(r)
     }
 
-  def readPair(p: Int): Int = (R(p) << 8 | R(p + 1)) & 0xFFFF
-
   def writeReg(r: Int, v: Int): Unit =
     r match {
       case M => memory.writeByte(readPair(HL), v)
       case _ => R(r) = v
+    }
+
+  def readPair(p: Int): Int =
+    p match {
+      case 3 => SP
+      case _ => (R(p << 1) << 8 | R((p << 1) + 1)) & 0xFFFF
+    }
+
+  def writePair(p: Int, v: Int): Unit =
+    p match {
+      case 3 => SP = v
+      case _ =>
+        R(p << 1) = v << 8
+        R((p << 1) + 1) = v & 0xFF
     }
 
   def resettable(dev: Device): Unit = {

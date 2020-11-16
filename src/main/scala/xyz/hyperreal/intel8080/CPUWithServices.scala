@@ -18,7 +18,7 @@ class CPUWithServices extends CPU {
 //
 //      prtz(A(1))
 //    }
-//
+
     n match {
       case 7 =>
         R(RA) match {
