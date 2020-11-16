@@ -76,7 +76,7 @@ class RAM(val name: String, val start: Int, end: Int) extends Addressable {
 
   def writeByte(addr: Int, value: Int) = mem(addr - start) = value.asInstanceOf[Byte]
 
-  override def toString = s"$name RAM: ${hexAddress(start.toInt)}-${hexAddress(end.toInt)}"
+  override def toString = s"$name RAM: ${hexWord(start.toInt)}-${hexWord(end.toInt)}"
 }
 
 class ROM(val name: String, val start: Int, end: Int) extends Addressable {
@@ -96,8 +96,27 @@ class ROM(val name: String, val start: Int, end: Int) extends Addressable {
 
   override def programByte(addr: Int, value: Int) = mem(addr - start) = value.asInstanceOf[Byte]
 
-  override def toString = s"$name ROM: ${hexAddress(start.toInt)}-${hexAddress(start.toInt + size - 1)}"
+  override def toString = s"$name ROM: ${hexWord(start.toInt)}-${hexWord(start.toInt + size - 1)}"
 
+}
+
+object ROM {
+//  def apply(name: String, data: String): ROM = {
+//    apply(name, 0, Hex(data))
+//  }
+
+  def apply(name: String, start: Int, data: Seq[Byte]) = {
+    new ROM(name, start, start + data.length - 1) {
+      data.copyToArray(mem)
+    }
+  }
+
+  def code(name: String, start: Int, data: Seq[Int]) = {
+    new ROM(name, start, start + data.length * 2 - 1) {
+      for ((inst, idx) <- data zipWithIndex)
+        programShort(start + idx * 2, inst)
+    }
+  }
 }
 
 trait Device extends Addressable {
@@ -113,7 +132,7 @@ trait Device extends Addressable {
 
   def reset = {}
 
-  override def toString = s"$name device: ${hexAddress(start)}-${hexAddress(start + size - 1)}"
+  override def toString = s"$name device: ${hexWord(start)}-${hexWord(start + size - 1)}"
 
 }
 
@@ -121,7 +140,7 @@ abstract class SingleAddressDevice extends Device {
 
   val size = 1
 
-  override def toString = s"$name device: ${hexAddress(start)}"
+  override def toString = s"$name device: ${hexWord(start)}"
 
 }
 
@@ -248,7 +267,7 @@ abstract class Memory extends Addressable {
     regions find (r => r.start <= region.start && region.start < r.start + r.size) match {
       case Some(r) =>
         sys.error(
-          hexAddress(region.start) + ", " + hexAddress(region.size) + " overlaps " + hexAddress(r.start) + ", " + hexAddress(
+          hexWord(region.start) + ", " + hexWord(region.size) + " overlaps " + hexWord(r.start) + ", " + hexWord(
             r.size))
       case None =>
     }

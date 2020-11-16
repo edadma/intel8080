@@ -19,6 +19,8 @@ class CPU extends Regs {
 
   var memory: Memory = _
 
+  val opcodes = CPU.opcodeTable
+
   val R = new Array[Int](8)
   var PC = 0
   var SP = 0
@@ -258,6 +260,9 @@ class CPU extends Regs {
   def fetch = opcode = fetchByte
 
   def fetchByte = {
+    if (prog eq null)
+      prog = memory.find(PC)
+
     val res = prog.readByte(PC)
 
     PC += 1
@@ -296,7 +301,7 @@ class CPU extends Regs {
 
   def printWatches(out: PrintStream) =
     out.println(
-      watches map { case (addr, list) => hexAddress(addr) + ": " + list.map(hexAddress).mkString(", ") } mkString "\n")
+      watches map { case (addr, list) => hexWord(addr) + ": " + list.map(hexWord).mkString(", ") } mkString "\n")
 
   def run(out: PrintStream): Unit = {
     try {
@@ -381,6 +386,7 @@ object CPU {
       populate(
         List[(String, Map[Char, Int] => Instruction)](
           "01 ddd sss" -> (o => new MOV(o('d'), o('s'))),
+          "00 ddd 110" -> (o => new MVI(o('d'))),
           "11 nnn 111" -> (o => new RST(o('n')))
         ))
       built = true

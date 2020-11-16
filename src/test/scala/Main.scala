@@ -8,7 +8,7 @@ object Main extends App {
         removeDevices
         regions.clear
         add(new ROM("program", 0, 0x7FFF))
-        add(new RAM("ram", 0x1000, 0xFFFF))
+        add(new RAM("ram", 0x8000, 0xFFFF))
       }
     }
   val cpu = new CPUWithServices { memory = mem }
@@ -16,7 +16,12 @@ object Main extends App {
   Hex(mem,
       """
       |0000:
-      |  
+      |  3E 00
+      |  06 41
+      |  FF
+      |  3E 01
+      |  FF
       |""".stripMargin)
+  cpu.run(Console.out)
 
 }

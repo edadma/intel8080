@@ -17,11 +17,9 @@ package object intel8080 {
 
   def hexByte(a: Int): String = "%02x".format(a & 0xFF).toUpperCase
 
-  def hexShort(a: Int) = hexByte(a >> 8) + hexByte(a)
+  def hexWord(a: Int) = hexByte(a >> 8) + hexByte(a)
 
-  def hexAddress(a: Int) = hexByte(a >> 16) + hexShort(a)
-
-  def hexInt(a: Int) = hexShort(a >> 16) + hexShort(a)
+  def hexInt(a: Int) = hexWord(a >> 16) + hexWord(a)
 
   def hexLong(a: Long) = hexInt((a >> 32).asInstanceOf[Int]) + hexInt(a.asInstanceOf[Int])
 

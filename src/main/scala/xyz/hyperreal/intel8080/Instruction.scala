@@ -31,14 +31,14 @@ class MOV(d: Int, s: Int) extends Instruction {
 
 }
 
-class MVI(d: Int, s: Int) extends Instruction {
+class MVI(d: Int) extends Instruction {
 
   def apply(cpu: CPU): Int = {
-    cpu.writeReg(d, cpu.readReg(s))
+    cpu.writeReg(d, cpu.fetchByte)
     1
   }
 
-  def disassemble(cpu: CPU): (String, Int) = (s"MOV ${reg(d)}, ${reg(s)}", 1)
+  def disassemble(cpu: CPU): (String, Int) = (s"MVI ${reg(d)}, #${hexByte(cpu.fetchByte)}", 1)
 
 }
 
@@ -58,7 +58,7 @@ class RST(n: Int) extends Instruction {
 object ILLEGAL extends Instruction {
 
   def apply(cpu: CPU): Int = {
-    sys.error("illegal instruction")
+    sys.error(s"illegal instruction: ${hexWord(cpu.PC)}")
   }
 
   def disassemble(cpu: CPU): (String, Int) = ("ILLEGAL", 1)

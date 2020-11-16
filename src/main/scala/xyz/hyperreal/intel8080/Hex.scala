@@ -36,6 +36,7 @@ object Hex {
               sys.error(s"no address on line ${i + 1}: $line")
 
             mem.programByte(addr, Integer.parseInt(s"$d1$d2", 16).asInstanceOf[Byte])
+            addr += 1
             chars(t)
           case _ => sys.error(s"error on line ${i + 1}: $line")
         }
