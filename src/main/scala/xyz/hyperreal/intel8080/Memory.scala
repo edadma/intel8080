@@ -100,25 +100,6 @@ class ROM(val name: String, val start: Int, end: Int) extends Addressable {
 
 }
 
-object ROM {
-  def apply(name: String, data: String): ROM = {
-    apply(name, 0, Hex(data))
-  }
-
-  def apply(name: String, start: Int, data: Seq[Byte]) = {
-    new ROM(name, start, start + data.length - 1) {
-      data.copyToArray(mem)
-    }
-  }
-
-  def code(name: String, start: Int, data: Seq[Int]) = {
-    new ROM(name, start, start + data.length * 2 - 1) {
-      for ((inst, idx) <- data zipWithIndex)
-        programShort(start + idx * 2, inst)
-    }
-  }
-}
-
 trait Device extends Addressable {
 
   protected var cpu: CPU = null

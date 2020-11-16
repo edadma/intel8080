@@ -255,7 +255,7 @@ class CPU extends Regs {
     }
   }
 
-  def fetch = opcode = fetchByte & 0xFF
+  def fetch = opcode = fetchByte
 
   def fetchByte = {
     val res = prog.readByte(PC)

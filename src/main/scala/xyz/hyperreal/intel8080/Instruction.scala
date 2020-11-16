@@ -31,6 +31,17 @@ class MOV(d: Int, s: Int) extends Instruction {
 
 }
 
+class MVI(d: Int, s: Int) extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    cpu.writeReg(d, cpu.readReg(s))
+    1
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = (s"MOV ${reg(d)}, ${reg(s)}", 1)
+
+}
+
 class RST(n: Int) extends Instruction {
 
   def apply(cpu: CPU): Int = {
