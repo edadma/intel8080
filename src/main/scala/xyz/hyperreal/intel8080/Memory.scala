@@ -37,14 +37,14 @@ trait Addressable {
     programInt(addr + 4, (value >> 32).asInstanceOf[Int])
   }
 
-  def readShort(addr: Int) = (readByte(addr) << 8) | (readByte(addr + 1) & 0xFF)
+  def readWord(addr: Int) = (readByte(addr) << 8) | (readByte(addr + 1) & 0xFF)
 
   def writeShort(addr: Int, value: Int): Unit = {
     writeByte(addr, value >> 8)
     writeByte(addr + 1, value & 0xFF)
   }
 
-  def readInt(addr: Int) = (readShort(addr) << 16) | (readShort(addr + 2) & 0xFFFF)
+  def readInt(addr: Int) = (readWord(addr) << 16) | (readWord(addr + 2) & 0xFFFF)
 
   def writeInt(addr: Int, value: Int): Unit = {
     writeShort(addr, value >> 16)
@@ -189,7 +189,7 @@ abstract class Memory extends Addressable {
 
   def writeByte(addr: Int, value: Int) = find(addr).writeByte(addr, value)
 
-  override def readShort(addr: Int) = find(addr).readShort(addr)
+  override def readWord(addr: Int) = find(addr).readWord(addr)
 
   override def writeShort(addr: Int, value: Int) = find(addr).writeShort(addr, value)
 

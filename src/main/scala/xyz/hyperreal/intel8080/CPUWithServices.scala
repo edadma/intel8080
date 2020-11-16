@@ -24,8 +24,8 @@ class CPUWithServices extends CPU {
         R(RA) match {
           case 0 => println(hexByte(R(RB)))
           case 1 =>
-            println("exit")
-            running = false
+            println("execution stop")
+            stop
         }
 //        R(0).toShort match {
 //          case 0 =>

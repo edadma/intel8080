@@ -92,7 +92,7 @@ class Emulator {
 
   def readByte(addr: Int) = mem.readByte(addr)
 
-  def readWord(addr: Int) = mem.readShort(addr)
+  def readWord(addr: Int) = mem.readWord(addr)
 
   def program(addr: Int, b: Int) = mem.programByte(addr, b)
 

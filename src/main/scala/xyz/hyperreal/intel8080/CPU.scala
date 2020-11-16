@@ -26,6 +26,7 @@ class CPU extends Regs {
   var SP = 0
   var A = false
   var C = false
+  var I = false
   var P = false
   var S = false
   var Z = false
@@ -53,15 +54,38 @@ class CPU extends Regs {
   var running = false
   var stopped = false
 
+  def readPSW: Int = {
+    var status = 2
+
+    status |= bit(S, SBIT)
+    status |= bit(Z, ZBIT)
+    status |= bit(A, ABIT)
+    status |= bit(P, PBIT)
+    status |= bit(C, CBIT)
+    status << 8 | R(0)
+  }
+
+  def writePSW(psw: Int): Unit = {
+    R(0) = psw & 0xFF
+
+    val status = psw >>> 8
+
+    S = testBit(status, SBIT)
+    Z = testBit(status, ZBIT)
+    A = testBit(status, ABIT)
+    P = testBit(status, PBIT)
+    C = testBit(status, CBIT)
+  }
+
   def readReg(r: Int): Int =
     r match {
-      case M => memory.readByte(readPair(HL))
+      case M => memory.readByte(readPair(RHL))
       case _ => R(r)
     }
 
   def writeReg(r: Int, v: Int): Unit =
     r match {
-      case M => memory.writeByte(readPair(HL), v)
+      case M => memory.writeByte(readPair(RHL), v)
       case _ => R(r) = v
     }
 
@@ -205,6 +229,9 @@ class CPU extends Regs {
     stop
     memory.reset
     resetSignal
+    counter = 0
+    PC = 0
+    I = false
   }
 
   def resetSignal: Unit = {
@@ -251,8 +278,7 @@ class CPU extends Regs {
 
     curpc = PC
     fetch
-    opcodes(opcode)(this)
-    counter += 1
+    counter += opcodes(opcode)(this)
 
     if (trace) {
       tracewrite match {
@@ -282,7 +308,7 @@ class CPU extends Regs {
   }
 
   def fetchWord = {
-    val res = prog.readShort(PC)
+    val res = prog.readWord(PC)
 
     PC += 2
     res
@@ -358,9 +384,9 @@ class CPU extends Regs {
 
   def memoryRead(address: Int, size: Size, aligned: Boolean) =
     size match {
-      case BitSize | ByteSize if aligned => memory.readShort(address).asInstanceOf[Byte].asInstanceOf[Int]
+      case BitSize | ByteSize if aligned => memory.readWord(address).asInstanceOf[Byte].asInstanceOf[Int]
       case BitSize | ByteSize            => memory.readByte(address)
-      case ShortSize                     => memory.readShort(address)
+      case ShortSize                     => memory.readWord(address)
       case IntSize                       => memory.readInt(address)
     }
 
@@ -399,6 +425,9 @@ object CPU {
         List[(String, Map[Char, Int] => Instruction)](
           "01 ddd sss" -> (o => new MOV(o('d'), o('s'))),
           "00 ddd 110" -> (o => new MVI(o('d'))),
+          "00 pp 0001" -> (o => new LXI(o('p'))),
+          "00111010" -> (_ => LDA),
+          "00110010" -> (_ => STA),
           "11 nnn 111" -> (o => new RST(o('n')))
         ))
       built = true

@@ -10,7 +10,14 @@ trait Regs {
   val RL = 5
   val M = 6
 
-  val BC = 0
-  val DE = 2
-  val HL = 4
+  val RBC = 0
+  val RDE = 1
+  val RHL = 2
+  val RSP = 3
+
+  val SBIT = 7
+  val ZBIT = 6
+  val ABIT = 4
+  val PBIT = 2
+  val CBIT = 1
 }
