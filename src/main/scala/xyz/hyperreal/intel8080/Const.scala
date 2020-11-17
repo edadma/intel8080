@@ -1,6 +1,6 @@
 package xyz.hyperreal.intel8080
 
-trait Regs {
+trait Const {
   val RA = 7
   val RB = 0
   val RC = 1
@@ -20,4 +20,13 @@ trait Regs {
   val ABIT = 4
   val PBIT = 2
   val CBIT = 1
+
+  val CNZ = 0
+  val CZ = 1
+  val CNC = 2
+  val CC = 3
+  val CPO = 4
+  val CPE = 5
+  val CP = 6
+  val CM = 7
 }

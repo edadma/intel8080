@@ -10,7 +10,7 @@ case class Interrupt(level: Int, vector: Option[Int]) extends Ordered[Interrupt]
   def compare(that: Interrupt): Int = level - that.level
 }
 
-class CPU extends Regs {
+class CPU extends Const {
 
 //  val UNDERLINED_OFF = "\u001B[24m"
 //  val LABEL_BG = "\u001B[48;5;238m"
@@ -53,6 +53,30 @@ class CPU extends Regs {
 
   var running = false
   var stopped = false
+
+  def push(v: Int): Unit = {
+    SP -= 2
+    memory.writeWord(SP, v)
+  }
+
+  def pop: Int = {
+    val res = memory.readWord(SP)
+
+    SP += 2
+    res
+  }
+
+  def cond(c: Int): Boolean =
+    c match {
+      case CNZ => !Z
+      case CZ  => Z
+      case CNC => !C
+      case CC  => C
+      case CPO => !P
+      case CPE => P
+      case CP  => !S
+      case CM  => S
+    }
 
   def readPSW: Int = {
     var status = 2
@@ -398,9 +422,9 @@ class CPU extends Regs {
       watchEvent(address, curpc)
 
     size match {
-      case BitSize | ByteSize if aligned => memory.writeShort(address, data)
+      case BitSize | ByteSize if aligned => memory.writeWord(address, data)
       case BitSize | ByteSize            => memory.writeByte(address, data)
-      case ShortSize                     => memory.writeShort(address, data)
+      case ShortSize                     => memory.writeWord(address, data)
       case IntSize                       => memory.writeInt(address, data)
     }
   }
@@ -428,7 +452,26 @@ object CPU {
           "00 pp 0001" -> (o => new LXI(o('p'))),
           "00111010" -> (_ => LDA),
           "00110010" -> (_ => STA),
-          "11 nnn 111" -> (o => new RST(o('n')))
+          "00101010" -> (_ => LHLA),
+          "00100010" -> (_ => SHLA),
+          "000 p 1010" -> (o => new LDAX(o('p'))),
+          "000 p 0010" -> (o => new STAX(o('p'))),
+          "11101011" -> (_ => XCHG),
+          //
+          "00 pp 0011" -> (o => new INX(o('p'))),
+          "00 pp 1011" -> (o => new DCX(o('p'))),
+          //
+          "00101111" -> (_ => CMA),
+          "00111111" -> (_ => CMC),
+          "00110111" -> (_ => STC),
+          "11000011" -> (_ => JMP),
+          "11 ccc 010" -> (o => new Jccc(o('c'))),
+          "11001101" -> (_ => CALL),
+          "11 ccc 100" -> (o => new Cccc(o('c'))),
+          "11001001" -> (_ => RET),
+          "11 ccc 000" -> (o => new Rccc(o('c'))),
+          "11 nnn 111" -> (o => new RST(o('n'))),
+          "11101001" -> (_ => PCHL),
         ))
       built = true
     }
