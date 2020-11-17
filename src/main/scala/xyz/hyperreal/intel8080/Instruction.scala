@@ -317,6 +317,96 @@ object PCHL extends Instruction {
 
 }
 
+//
+
+object XTHL extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    val top = cpu.memory.readWord(cpu.SP)
+
+    cpu.memory.writeWord(cpu.SP, cpu.readPair(RHL))
+    cpu.writePair(RHL, top)
+    16
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = ("XTHL", 1)
+
+}
+
+object SPHL extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    cpu.SP = cpu.readPair(RHL)
+    16
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = ("SPHL", 1)
+
+}
+
+object IN extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    cpu.out(cpu.fetchByte, cpu.R(RA))
+    10
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = ("OUT", 1)
+
+}
+
+object OUT extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    cpu.out(cpu.fetchByte, cpu.R(RA))
+    10
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = ("OUT", 1)
+
+}
+
+object EI extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    cpu.I = true
+    4
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = ("EI", 1)
+
+}
+
+object DI extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    cpu.I = false
+    4
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = ("DI", 1)
+
+}
+
+object HLT extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    sys.error("ni")
+    7
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = ("HLT", 1)
+
+}
+
+object NOP extends Instruction {
+
+  def apply(cpu: CPU): Int = 4
+
+  def disassemble(cpu: CPU): (String, Int) = ("NOP", 1)
+
+}
+
 object ILLEGAL extends Instruction {
 
   def apply(cpu: CPU): Int = {

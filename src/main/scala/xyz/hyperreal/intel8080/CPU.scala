@@ -151,6 +151,10 @@ class CPU extends Const {
 
   def trap(n: Int) = false
 
+  def out(port: Int, v: Int): Unit = sys.error("ni")
+
+  def in(port: Int): Int = sys.error("ni")
+
   def jump(address: Int): Unit = {
     prog = memory.find(address)
     PC = address
@@ -472,6 +476,15 @@ object CPU {
           "11 ccc 000" -> (o => new Rccc(o('c'))),
           "11 nnn 111" -> (o => new RST(o('n'))),
           "11101001" -> (_ => PCHL),
+          //
+          "11100011" -> (_ => XTHL),
+          "11111001" -> (_ => SPHL),
+          "11011011" -> (_ => IN),
+          "11010011" -> (_ => OUT),
+          "11111011" -> (_ => EI),
+          "11110011" -> (_ => DI),
+          "01110110" -> (_ => HLT),
+          "00000000" -> (_ => NOP),
         ))
       built = true
     }
