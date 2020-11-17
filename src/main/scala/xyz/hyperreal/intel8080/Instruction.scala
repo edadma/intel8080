@@ -202,6 +202,58 @@ class DAD(p: Int) extends Instruction {
 
 //
 
+object RLC extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    cpu.C = testBit(cpu.R(RA), 7)
+    cpu.writeReg(RA, cpu.R(RA) << 1 | bit(cpu.C, 0))
+    4
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = ("RLC", 1)
+
+}
+
+object RRC extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    cpu.C = testBit(cpu.R(RA), 0)
+    cpu.writeReg(RA, cpu.R(RA) >>> 1 | bit(cpu.C, 7))
+    4
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = ("RRC", 1)
+
+}
+
+object RAL extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    val c = cpu.C
+
+    cpu.C = testBit(cpu.R(RA), 7)
+    cpu.writeReg(RA, cpu.R(RA) << 1 | bit(c, 0))
+    4
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = ("RAL", 1)
+
+}
+
+object RAR extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    val c = cpu.C
+
+    cpu.C = testBit(cpu.R(RA), 0)
+    cpu.writeReg(RA, cpu.R(RA) >>> 1 | bit(c, 7))
+    4
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = ("RAR", 1)
+
+}
+
 object CMA extends Instruction {
 
   def apply(cpu: CPU): Int = {
