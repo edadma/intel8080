@@ -110,7 +110,7 @@ class CPU extends Const {
   def writeReg(r: Int, v: Int): Unit =
     r match {
       case M => memory.writeByte(readPair(RHL), v)
-      case _ => R(r) = v
+      case _ => R(r) = v & 0xFF
     }
 
   def readPair(p: Int): Int =
@@ -123,8 +123,8 @@ class CPU extends Const {
     p match {
       case 3 => SP = v
       case _ =>
-        R(p << 1) = v << 8
-        R((p << 1) + 1) = v & 0xFF
+        writeReg(p << 1, v << 8)
+        writeReg((p << 1) + 1, v)
     }
 
   def resettable(dev: Device): Unit = {
@@ -476,7 +476,8 @@ object CPU {
           "11 ccc 000" -> (o => new Rccc(o('c'))),
           "11 nnn 111" -> (o => new RST(o('n'))),
           "11101001" -> (_ => PCHL),
-          //
+          "11 pp 0101" -> (o => new PUSH(o('p'))),
+          "11 pp 0001" -> (o => new POP(o('p'))),
           "11100011" -> (_ => XTHL),
           "11111001" -> (_ => SPHL),
           "11011011" -> (_ => IN),

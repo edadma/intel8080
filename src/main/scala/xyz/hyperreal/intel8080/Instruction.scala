@@ -186,6 +186,22 @@ class DCX(p: Int) extends Instruction {
 
 //
 
+class DAD(p: Int) extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    val sum = cpu.readPair(p).asInstanceOf[Short].asInstanceOf[Int] + cpu.readPair(RHL)
+
+    cpu.C = sum > 0xFFFF
+    cpu.writePair(RHL, sum)
+    10
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = (s"DAD ${regPair(p)}", 1)
+
+}
+
+//
+
 object CMA extends Instruction {
 
   def apply(cpu: CPU): Int = {
@@ -317,7 +333,27 @@ object PCHL extends Instruction {
 
 }
 
-//
+class PUSH(p: Int) extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    cpu.push(if (p == RSP) cpu.readPSW else cpu.readPair(p))
+    11
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = (s"PUSH ${regPair(p)}", 1)
+
+}
+
+class POP(p: Int) extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    if (p == RSP) cpu.writePSW(cpu.pop) else cpu.writePair(p, cpu.pop)
+    10
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = (s"POP ${regPair(p)}", 1)
+
+}
 
 object XTHL extends Instruction {
 
