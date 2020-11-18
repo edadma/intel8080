@@ -481,6 +481,7 @@ object CPU {
           "000 p 0010" -> (o => new STAX(o('p'))),
           "11101011" -> (_ => XCHG),
           "10000 sss" -> (o => new ADD(o('s'))),
+          "11000110" -> (_ => ADI),
           //
           "00 pp 0011" -> (o => new INX(o('p'))),
           "00 pp 1011" -> (o => new DCX(o('p'))),
