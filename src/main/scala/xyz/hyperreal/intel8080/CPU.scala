@@ -54,6 +54,21 @@ class CPU extends Const {
   var running = false
   var stopped = false
 
+  def operation(carry: Boolean, arith: Boolean, add: Boolean, a: Int, b: Int, f: (Int, Int) => Int): Int = {
+    val result = f(a, b)
+
+    if (carry)
+      C = if (add) result > 255 else if (arith) result < 0 else false
+
+    if (arith)
+      A = if (add) (a & 0xF) + (b & 0xF) > 0xF else (a & 0xF) - (b & 0xF) < 0
+
+    Z = result == 0
+    P = CPU.parity(result)
+    S = (result & 0x80) != 0
+    result
+  }
+
   def push(v: Int): Unit = {
     SP -= 2
     memory.writeWord(SP, v)
@@ -436,6 +451,10 @@ class CPU extends Const {
 
 object CPU {
 
+  private val parity =
+    (for (i <- 0 until 0x100)
+      yield i.toBinaryString.count(_ == '1') % 2 == 0).to(ArraySeq)
+
   private val opcodes = Array.fill[Instruction](0x100)(ILLEGAL)
   private var built = false
 
@@ -461,6 +480,7 @@ object CPU {
           "000 p 1010" -> (o => new LDAX(o('p'))),
           "000 p 0010" -> (o => new STAX(o('p'))),
           "11101011" -> (_ => XCHG),
+          "10000 sss" -> (o => new ADD(o('s'))),
           //
           "00 pp 0011" -> (o => new INX(o('p'))),
           "00 pp 1011" -> (o => new DCX(o('p'))),

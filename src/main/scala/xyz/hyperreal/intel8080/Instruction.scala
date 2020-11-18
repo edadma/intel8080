@@ -160,6 +160,17 @@ object XCHG extends Instruction {
 
 }
 
+class ADD(s: Int) extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    cpu.writeReg(RA, cpu.operation(carry = true, arith = true, add = true, cpu.readReg(s), cpu.R(RA), _ + _))
+    if (s == M) 7 else 4
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = (s"ADD ${reg(s)}", 1)
+
+}
+
 //
 
 class INX(p: Int) extends Instruction {
