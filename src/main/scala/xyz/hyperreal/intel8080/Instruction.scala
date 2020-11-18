@@ -175,10 +175,23 @@ object ADI extends Instruction {
 
   def apply(cpu: CPU): Int = {
     cpu.writeReg(RA, cpu.operation(carry = true, arith = true, add = true, cpu.fetchByte, cpu.R(RA), _ + _))
-    if (s == M) 7 else 4
+    7
   }
 
   def disassemble(cpu: CPU): (String, Int) = (s"ADI ${cpu.fetchByte}", 1)
+
+}
+
+class ADC(s: Int) extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    cpu.writeReg(
+      RA,
+      cpu.operation(carry = true, arith = true, add = true, cpu.readReg(s) + boolean2int(cpu.C), cpu.R(RA), _ + _))
+    if (s == M) 7 else 4
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = (s"ADC ${reg(s)}", 1)
 
 }
 
