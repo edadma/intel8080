@@ -460,7 +460,10 @@ object CPU {
 
   private def populate(pattern: String, inst: Map[Char, Int] => Instruction): Unit =
     for ((idx, m) <- generate(pattern))
-      opcodes(idx) = inst(m)
+      if (opcodes(idx) == ILLEGAL)
+        sys.error(s"opcode ${idx.toHexString} already assigned")
+      else
+        opcodes(idx) = inst(m)
 
   private def populate(insts: List[(String, Map[Char, Int] => Instruction)]): Unit =
     for ((p, c) <- insts)
@@ -483,10 +486,18 @@ object CPU {
           "10000 sss" -> (o => new ADD(o('s'))),
           "11000110" -> (_ => ADI),
           "10001 sss" -> (o => new ADC(o('s'))),
-          //
+          "11001110" -> (_ => ACI),
+          "10010 sss" -> (o => new SUB(o('s'))),
+          "11010110" -> (_ => SUI),
+          "10011 sss" -> (o => new SBC(o('s'))),
+          "11011110" -> (_ => SBI),
+          "00 ddd 100" -> (o => new INR(o('d'))),
+          "00 ddd 101" -> (o => new DCR(o('d'))),
           "00 pp 0011" -> (o => new INX(o('p'))),
           "00 pp 1011" -> (o => new DCX(o('p'))),
           //
+          "10111 sss" -> (o => new CMP(o('s'))),
+          "11111110" -> (_ => CPI),
           "00000111" -> (_ => RLC),
           "00001111" -> (_ => RRC),
           "00010111" -> (_ => RAL),

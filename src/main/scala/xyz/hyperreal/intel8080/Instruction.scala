@@ -195,7 +195,88 @@ class ADC(s: Int) extends Instruction {
 
 }
 
-//
+object ACI extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    cpu.writeReg(
+      RA,
+      cpu.operation(carry = true, arith = true, add = true, cpu.fetchByte + boolean2int(cpu.C), cpu.R(RA), _ + _))
+    7
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = (s"ACI ${cpu.fetchByte}", 1)
+
+}
+
+class SUB(s: Int) extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    cpu.writeReg(RA, cpu.operation(carry = true, arith = true, add = false, cpu.readReg(s), cpu.R(RA), _ - _))
+    if (s == M) 7 else 4
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = (s"SUB ${reg(s)}", 1)
+
+}
+
+object SUI extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    cpu.writeReg(RA, cpu.operation(carry = true, arith = true, add = false, cpu.fetchByte, cpu.R(RA), _ - _))
+    7
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = (s"SUI ${cpu.fetchByte}", 1)
+
+}
+
+class SBC(s: Int) extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    cpu.writeReg(
+      RA,
+      cpu.operation(carry = true, arith = true, add = false, cpu.readReg(s) - boolean2int(cpu.C), cpu.R(RA), _ - _))
+    if (s == M) 7 else 4
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = (s"SBC ${reg(s)}", 1)
+
+}
+
+object SBI extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    cpu.writeReg(
+      RA,
+      cpu.operation(carry = true, arith = true, add = false, cpu.fetchByte - boolean2int(cpu.C), cpu.R(RA), _ - _))
+    7
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = (s"SBI ${cpu.fetchByte}", 1)
+
+}
+
+class INR(d: Int) extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    cpu.writeReg(RA, cpu.operation(carry = false, arith = true, add = true, cpu.readReg(d), 1, _ + _))
+    if (d == M) 7 else 4
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = (s"INR ${reg(d)}", 1)
+
+}
+
+class DCR(d: Int) extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    cpu.writeReg(RA, cpu.operation(carry = false, arith = true, add = false, cpu.readReg(d), 1, _ - _))
+    if (d == M) 7 else 4
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = (s"DCR ${reg(d)}", 1)
+
+}
 
 class INX(p: Int) extends Instruction {
 
@@ -236,6 +317,28 @@ class DAD(p: Int) extends Instruction {
 }
 
 //
+
+class CMP(s: Int) extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    cpu.operation(carry = true, arith = true, add = false, cpu.readReg(s), cpu.R(RA), _ - _)
+    if (s == M) 7 else 4
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = (s"CMP ${reg(s)}", 1)
+
+}
+
+object CPI extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    cpu.operation(carry = true, arith = true, add = false, cpu.fetchByte, cpu.R(RA), _ - _)
+    7
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = (s"CPI ${cpu.fetchByte}", 1)
+
+}
 
 object RLC extends Instruction {
 
