@@ -300,8 +300,6 @@ class DCX(p: Int) extends Instruction {
 
 }
 
-//
-
 class DAD(p: Int) extends Instruction {
 
   def apply(cpu: CPU): Int = {
@@ -317,6 +315,72 @@ class DAD(p: Int) extends Instruction {
 }
 
 //
+
+class AND(s: Int) extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    cpu.writeReg(RA, cpu.operation(carry = true, arith = false, add = false, cpu.readReg(s), cpu.R(RA), _ & _))
+    if (s == M) 7 else 4
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = (s"AND ${reg(s)}", 1)
+
+}
+
+object ANI extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    cpu.writeReg(RA, cpu.operation(carry = true, arith = false, add = false, cpu.fetchByte, cpu.R(RA), _ & _))
+    7
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = (s"ANI ${cpu.fetchByte}", 1)
+
+}
+
+class ORA(s: Int) extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    cpu.writeReg(RA, cpu.operation(carry = true, arith = false, add = false, cpu.readReg(s), cpu.R(RA), _ | _))
+    if (s == M) 7 else 4
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = (s"ORA ${reg(s)}", 1)
+
+}
+
+object ORI extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    cpu.writeReg(RA, cpu.operation(carry = true, arith = false, add = false, cpu.fetchByte, cpu.R(RA), _ | _))
+    7
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = (s"ORI ${cpu.fetchByte}", 1)
+
+}
+
+class XRA(s: Int) extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    cpu.writeReg(RA, cpu.operation(carry = true, arith = false, add = false, cpu.readReg(s), cpu.R(RA), _ ^ _))
+    if (s == M) 7 else 4
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = (s"XRA ${reg(s)}", 1)
+
+}
+
+object XRI extends Instruction {
+
+  def apply(cpu: CPU): Int = {
+    cpu.writeReg(RA, cpu.operation(carry = true, arith = false, add = false, cpu.fetchByte, cpu.R(RA), _ ^ _))
+    7
+  }
+
+  def disassemble(cpu: CPU): (String, Int) = (s"XRI ${cpu.fetchByte}", 1)
+
+}
 
 class CMP(s: Int) extends Instruction {
 

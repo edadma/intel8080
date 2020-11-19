@@ -67,7 +67,7 @@ INX RP    00RP0011          -       Increment register pair
 DCX RP    00RP1011          -       Decrement register pair
 DAD RP    00RP1001          C       Add register pair to HL (16 bit add)
 DAA       00100111          ZSPCA   Decimal Adjust accumulator
-ANA S     10100SSS          ZSCP    AND register with A
+AND S     10100SSS          ZSCP    AND register with A
 ANI #     11100110 db       ZSPC    AND immediate with A
 ORA S     10110SSS          ZSPCA   OR  register with A
 ORI #     11110110          ZSPCA   OR  immediate with A
