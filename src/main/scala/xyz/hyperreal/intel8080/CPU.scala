@@ -458,78 +458,86 @@ object CPU {
   private val opcodes = Array.fill[Instruction](0x100)(ILLEGAL)
   private var built = false
 
-  private def populate(pattern: String, inst: Map[Char, Int] => Instruction): Unit =
-    for ((idx, m) <- generate(pattern))
+  private def populate(insts: List[(String, Map[Char, Int] => Instruction)]): Unit =
+    for ((pat, inst) <- insts; (idx, m) <- generate(pat))
       if (opcodes(idx) == ILLEGAL)
         sys.error(s"opcode ${idx.toHexString} already assigned")
       else
         opcodes(idx) = inst(m)
 
-  private def populate(insts: List[(String, Map[Char, Int] => Instruction)]): Unit =
-    for ((p, c) <- insts)
-      populate(p, c)
+  trait InstType
+  case object NoOpInst extends InstType
+  case object RegInst extends InstType
+  case object RegImmInst extends InstType
+  case object Reg2Inst extends InstType
+  case object PairInst extends InstType
+  case object PairImmInst extends InstType
+  case object CondInst extends InstType
+  case object RelInst extends InstType
+  case object ImmInst extends InstType
+  case object AbsInst extends InstType
 
   def opcodeTable: IndexedSeq[Instruction] = {
     if (!built) {
       populate(
-        List[(String, Map[Char, Int] => Instruction)](
-          "01 ddd sss" -> (o => new MOV(o('d'), o('s'))),
-          "00 ddd 110" -> (o => new MVI(o('d'))),
-          "00 pp 0001" -> (o => new LXI(o('p'))),
-          "00111010" -> (_ => LDA),
-          "00110010" -> (_ => STA),
-          "00101010" -> (_ => LHLA),
-          "00100010" -> (_ => SHLA),
-          "000 p 1010" -> (o => new LDAX(o('p'))),
-          "000 p 0010" -> (o => new STAX(o('p'))),
-          "11101011" -> (_ => XCHG),
-          "10000 sss" -> (o => new ADD(o('s'))),
-          "11000110" -> (_ => ADI),
-          "10001 sss" -> (o => new ADC(o('s'))),
-          "11001110" -> (_ => ACI),
-          "10010 sss" -> (o => new SUB(o('s'))),
-          "11010110" -> (_ => SUI),
-          "10011 sss" -> (o => new SBC(o('s'))),
-          "11011110" -> (_ => SBI),
-          "00 ddd 100" -> (o => new INR(o('d'))),
-          "00 ddd 101" -> (o => new DCR(o('d'))),
-          "00 pp 0011" -> (o => new INX(o('p'))),
-          "00 pp 1011" -> (o => new DCX(o('p'))),
-          "00 pp 1001" -> (o => new DAD(o('p'))),
+        List[(String, (String, InstType, Map[Char, Int] => Instruction))](
+          "01 ddd sss" -> ("MOV", Reg2Inst, o => new MOV(o('d'), o('s'))),
+          "00 ddd 110" -> ("MVI", RegImmInst, o => new MVI(o('d'))),
+          "00 pp 0001" -> ("LXI", PairImmInst, o => new LXI(o('p'))),
+          "00111010" -> ("LDA", NoOpInst, _ => LDA),
+          "00110010" -> ("STA", NoOpInst, _ => STA),
+          "00101010" -> ("LHLA", NoOpInst, _ => LHLA),
+          "00100010" -> ("SHLA", NoOpInst, _ => SHLA),
+          "000 p 1010" -> ("LDAX", PairInst, o => new LDAX(o('p'))),
+          "000 p 0010" -> ("STAX", PairInst, o => new STAX(o('p'))),
+          "11101011" -> ("XCHG", NoOpInst, _ => XCHG),
+          "10000 sss" -> ("ADD", RegInst, o => new ADD(o('s'))),
+          "11000110" -> ("ADI", ImmInst, _ => ADI),
+          "10001 sss" -> ("ADC", RegInst, o => new ADC(o('s'))),
+          "11001110" -> ("ACI", ImmInst, _ => ACI),
+          "10010 sss" -> ("SUB", RegInst, o => new SUB(o('s'))),
+          "11010110" -> ("SUI", ImmInst, _ => SUI),
+          "10011 sss" -> ("SBC", RegInst, o => new SBC(o('s'))),
+          "11011110" -> ("SBI", ImmInst, _ => SBI),
+          "00 ddd 100" -> ("INR", RegInst, o => new INR(o('d'))),
+          "00 ddd 101" -> ("DCR", RegInst, o => new DCR(o('d'))),
+          "00 pp 0011" -> ("INX", PairInst, o => new INX(o('p'))),
+          "00 pp 1011" -> ("DCX", PairInst, o => new DCX(o('p'))),
+          "00 pp 1001" -> ("DAD", PairInst, o => new DAD(o('p'))),
           //
-          "10100 sss" -> (o => new AND(o('s'))),
-          "11100110" -> (_ => ANI),
-          "10110 sss" -> (o => new ORA(o('s'))),
-          "11110110" -> (_ => ORI),
-          "10101 sss" -> (o => new XRA(o('s'))),
-          "11101110" -> (_ => XRI),
-          "10111 sss" -> (o => new CMP(o('s'))),
-          "11111110" -> (_ => CPI),
-          "00000111" -> (_ => RLC),
-          "00001111" -> (_ => RRC),
-          "00010111" -> (_ => RAL),
-          "00011111" -> (_ => RAR),
-          "00101111" -> (_ => CMA),
-          "00111111" -> (_ => CMC),
-          "00110111" -> (_ => STC),
+          "10100 sss" -> ("AND", RegInst, o => new AND(o('s'))),
+          "11100110" -> ("ANI", ImmInst, _ => ANI),
+          "10110 sss" -> ("ORA", RegInst, o => new ORA(o('s'))),
+          "11110110" -> ("ORI", ImmInst, _ => ORI),
+          "10101 sss" -> ("XRA", RegInst, o => new XRA(o('s'))),
+          "11101110" -> ("XRI", ImmInst, _ => XRI),
+          "10111 sss" -> ("CMP", RegInst, o => new CMP(o('s'))),
+          "11111110" -> ("CPI", ImmInst, _ => CPI),
+          "00000111" -> ("RLC", NoOpInst, _ => RLC),
+          "00001111" -> ("RRC", NoOpInst, _ => RRC),
+          "00010111" -> ("RAL", NoOpInst, _ => RAL),
+          "00011111" -> ("RAR", NoOpInst, _ => RAR),
+          "00101111" -> ("CMA", NoOpInst, _ => CMA),
+          "00111111" -> ("CMC", NoOpInst, _ => CMC),
+          "00110111" -> ("STC", NoOpInst, _ => STC),
           "11000011" -> (_ => JMP),
           "11 ccc 010" -> (o => new Jccc(o('c'))),
           "11001101" -> (_ => CALL),
           "11 ccc 100" -> (o => new Cccc(o('c'))),
-          "11001001" -> (_ => RET),
+          "11001001" -> ("RET", NoOpInst, _ => RET),
           "11 ccc 000" -> (o => new Rccc(o('c'))),
           "11 nnn 111" -> (o => new RST(o('n'))),
-          "11101001" -> (_ => PCHL),
-          "11 pp 0101" -> (o => new PUSH(o('p'))),
-          "11 pp 0001" -> (o => new POP(o('p'))),
-          "11100011" -> (_ => XTHL),
-          "11111001" -> (_ => SPHL),
+          "11101001" -> ("PCHL", NoOpInst, _ => PCHL),
+          "11 pp 0101" -> ("PUSH", PairInst, o => new PUSH(o('p'))),
+          "11 pp 0001" -> ("POP", PairInst, o => new POP(o('p'))),
+          "11100011" -> ("XTHL", NoOpInst, _ => XTHL),
+          "11111001" -> ("SPHL", NoOpInst, _ => SPHL),
           "11011011" -> (_ => IN),
           "11010011" -> (_ => OUT),
-          "11111011" -> (_ => EI),
-          "11110011" -> (_ => DI),
-          "01110110" -> (_ => HLT),
-          "00000000" -> (_ => NOP),
+          "11111011" -> ("EI", NoOpInst, _ => EI),
+          "11110011" -> ("DI", NoOpInst, _ => DI),
+          "01110110" -> ("HLT", NoOpInst, _ => HLT),
+          "00000000" -> ("NOP", NoOpInst, _ => NOP),
         ))
       built = true
     }
